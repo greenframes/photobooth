@@ -1,7 +1,7 @@
 /* Service Worker der Aschke Foto-Booth
    Beim ersten Laden wird alles Nötige gespeichert, danach läuft die App auch ohne Netz.
    Bei jeder Änderung an den Dateien die Versionsnummer in CACHE erhöhen. */
-const CACHE = "aschke-booth-v8";
+const CACHE = "aschke-booth-v9";
 const SHELL = [
   "./",
   "index.html",
@@ -9,12 +9,7 @@ const SHELL = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-maskable-512.png",
-  "icons/apple-touch-icon.png",
-  "vendor/face-api.js",
-  "models/tiny_face_detector_model-weights_manifest.json",
-  "models/tiny_face_detector_model.bin",
-  "models/face_landmark_68_tiny_model-weights_manifest.json",
-  "models/face_landmark_68_tiny_model.bin"
+  "icons/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", event => {
