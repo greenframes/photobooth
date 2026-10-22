@@ -153,6 +153,7 @@
           <button class="chip" type="button" id="tBubble" aria-pressed="true">Sprechblase</button>
           <button class="chip" type="button" id="tHearts" aria-pressed="true">Herzchen</button>
           <button class="chip" type="button" id="tEkg" aria-pressed="false">EKG-Linie</button>
+          <button class="chip" type="button" id="tGlasses" aria-pressed="false">Sonnenbrille</button>
         </div>
       </div>
       <div class="shutter-wrap">
@@ -163,7 +164,6 @@
     <!-- Ergebnis -->
     <section class="panel" id="resultPanel" hidden>
       <button class="btn primary" id="share" type="button">Teilen / Sichern</button>
-      <button class="btn" id="download" type="button">Als Datei herunterladen</button>
       <button class="btn" id="again" type="button">Nochmal</button>
       <button class="linkbtn" id="delMine" type="button" hidden>Mein Foto vom iPad löschen</button>
       <p class="hint">Markiere uns gern: <strong id="tagHint">#pflegeschuleaschke</strong><br>Tipp: Über „Teilen“ geht’s per AirDrop direkt aufs eigene Handy.</p>
@@ -252,7 +252,7 @@ const CONFIG = {
 const FONT = 'system-ui, "Helvetica Neue", Arial, sans-serif';
 
 /* ===================== Zustand ===================== */
-const state = { plural: false, slogan: 0, bubble: 0, hearts: true, ekg: false, count: 0 };
+const state = { plural: false, slogan: 0, bubble: 0, hearts: true, ekg: false, glasses: false, count: 0 };
 const pick = pair => pair[state.plural ? 1 : 0];   // Einzahl oder Mehrzahl
 const el = id => document.getElementById(id);
 const live = el("live"), lctx = live.getContext("2d");
@@ -341,6 +341,77 @@ function drawEkg(ctx) {
   ctx.fillStyle = CONFIG.pink; ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = "#fff"; ctx.stroke();
   ctx.restore();
 }
+/* ===================== Sonnenbrille (Gesichtserkennung läuft im Browser, ohne Upload) ===================== */
+let liveFaces = [], liveSeen = 0, faceReady = false, faceP = null, detecting = false;
+let dCanvas = null;
+const loadScript = src => new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("script")); document.head.appendChild(s); });
+function ensureFace() {
+  if (!faceP) faceP = (async () => {
+    await loadScript("vendor/face-api.js");
+    await faceapi.nets.tinyFaceDetector.loadFromUri("models");
+    await faceapi.nets.faceLandmark68TinyNet.loadFromUri("models");
+    faceReady = true;
+  })().catch(e => { faceP = null; throw e; });
+  return faceP;
+}
+// Liefert Augenpositionen je Gesicht, normiert auf das Quellbild (0…1)
+async function detectFaces(srcEl) {
+  const sw = srcEl.videoWidth || srcEl.width, sh = srcEl.videoHeight || srcEl.height;
+  if (!sw || !sh) return [];
+  const w = 480, h = Math.round(w * sh / sw);
+  if (!dCanvas) dCanvas = document.createElement("canvas");
+  dCanvas.width = w; dCanvas.height = h;
+  dCanvas.getContext("2d").drawImage(srcEl, 0, 0, w, h);
+  const res = await faceapi.detectAllFaces(dCanvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 })).withFaceLandmarks(true);
+  const mid = pts => ({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length / w, y: pts.reduce((s, p) => s + p.y, 0) / pts.length / h });
+  return res.map(r => {
+    const p = r.landmarks.positions, a = mid(p.slice(36, 42)), b = mid(p.slice(42, 48));
+    return { a, b, cx: (a.x + b.x) / 2 };
+  }).sort((u, v) => u.cx - v.cx);
+}
+function smoothFaces(prev, next) {
+  if (prev.length !== next.length) return next;
+  const k = 0.55, mix = (p, n) => ({ x: p.x + (n.x - p.x) * k, y: p.y + (n.y - p.y) * k });
+  return next.map((n, i) => { const a = mix(prev[i].a, n.a), b = mix(prev[i].b, n.b); return { a, b, cx: (a.x + b.x) / 2 }; });
+}
+async function liveDetect() {
+  if (state.glasses && faceReady && mode === "live" && camOk && video.readyState >= 2 && !detecting) {
+    detecting = true;
+    try {
+      const f = await detectFaces(video);
+      if (f.length) { liveFaces = smoothFaces(liveFaces, f); liveSeen = Date.now(); }
+      else if (Date.now() - liveSeen > 500) liveFaces = [];
+    } catch (e) { /* nächster Versuch */ }
+    detecting = false;
+  }
+  setTimeout(liveDetect, 90);
+}
+const glassesImg = new Image();
+glassesImg.src = "icons/glasses.png";
+// Position der Glasmitten im Bild (aus dem Foto der echten Brille)
+const GLASSES = { w: 720, h: 245, lx: 167.6, ly: 118.6, rx: 527.9, ry: 125.1 };
+function drawGlasses(ctx, src, faces, px, py, pw, ph) {
+  const sw = src.videoWidth || src.width, sh = src.videoHeight || src.height;
+  if (!sw || !sh || !faces || !faces.length || !glassesImg.complete || !glassesImg.naturalWidth) return;
+  const k = Math.max(pw / sw, ph / sh);
+  const toScene = p => ({ x: px + pw / 2 - (p.x - 0.5) * sw * k, y: py + ph / 2 + (p.y - 0.5) * sh * k });   // gespiegelt wie das Bild
+  const G = GLASSES, gd = Math.hypot(G.rx - G.lx, G.ry - G.ly), gang = Math.atan2(G.ry - G.ly, G.rx - G.lx);
+  for (const f of faces) {
+    let L = toScene(f.a), R = toScene(f.b);
+    if (L.x > R.x) [L, R] = [R, L];
+    const d = Math.hypot(R.x - L.x, R.y - L.y), ang = Math.atan2(R.y - L.y, R.x - L.x);
+    if (d < 20) continue;
+    const s = d / gd * 1.12;                         // Brille etwas breiter als der Augenabstand
+    ctx.save();
+    ctx.translate((L.x + R.x) / 2, (L.y + R.y) / 2 + d * 0.04);
+    ctx.rotate(ang - gang);
+    ctx.scale(s, s);
+    ctx.shadowColor = "rgba(0,0,0,.30)"; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+    ctx.drawImage(glassesImg, -(G.lx + G.rx) / 2, -(G.ly + G.ry) / 2);
+    ctx.restore();
+  }
+}
+
 function drawBubble(ctx) {
   const text = pick(CONFIG.bubbles[state.bubble]);
   ctx.save();
@@ -367,7 +438,7 @@ function drawBubble(ctx) {
 }
 
 /* ===================== Gesamtbild (1080 × 1350) ===================== */
-function drawScene(ctx, src, scale, count) {
+function drawScene(ctx, src, scale, count, faces) {
   ctx.save();
   ctx.scale(scale, scale);
   // Rahmen
@@ -382,6 +453,7 @@ function drawScene(ctx, src, scale, count) {
     ctx.fillStyle = "#707070"; ctx.textAlign = "center"; ctx.font = `700 40px ${FONT}`;
     ctx.fillText("Kamera startet …", 540, 560);
   }
+  if (state.glasses && src) drawGlasses(ctx, src, faces || liveFaces, px, py, pw, ph);
   if (state.hearts) drawHearts(ctx);
   if (state.ekg) drawEkg(ctx);
   if (state.bubble >= 0) drawBubble(ctx);
@@ -474,8 +546,10 @@ async function capture() {
   snap.width = video.videoWidth; snap.height = video.videoHeight;
   snap.getContext("2d").drawImage(video, 0, 0);
   const f = el("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go");
+  let faces = liveFaces;
+  if (state.glasses && faceReady) { try { const f = await detectFaces(snap); if (f.length) faces = f; } catch (e) { /* letzte Live-Position */ } }
   const out = document.createElement("canvas"); out.width = 1080; out.height = 1350;
-  drawScene(out.getContext("2d"), snap, 1, 0);
+  drawScene(out.getContext("2d"), snap, 1, 0, faces);
   const blob = await toBlob(out, "image/jpeg", 0.92);
   const thumb = await makeThumb(out);
   if (resultUrl) URL.revokeObjectURL(resultUrl);
@@ -503,7 +577,7 @@ function showLive() {
   if (!camOk) startCam();
 }
 function fullReset() {
-  state.plural = false; state.slogan = 0; state.bubble = 0; state.hearts = true; state.ekg = false;
+  state.plural = false; state.slogan = 0; state.bubble = 0; state.hearts = true; state.ekg = false; state.glasses = false; liveFaces = [];
   closeStaff(); syncUi(); showLive();
 }
 
@@ -524,7 +598,6 @@ async function share() {
   download();
 }
 el("share").addEventListener("click", share);
-el("download").addEventListener("click", download);
 el("again").addEventListener("click", showLive);
 el("shutter").addEventListener("click", capture);
 
@@ -538,6 +611,7 @@ function syncUi() {
   el("pGroup").setAttribute("aria-checked", String(state.plural));
   el("tHearts").setAttribute("aria-pressed", String(state.hearts));
   el("tEkg").setAttribute("aria-pressed", String(state.ekg));
+  el("tGlasses").setAttribute("aria-pressed", String(state.glasses));
   el("tBubble").setAttribute("aria-pressed", String(state.bubble >= 0));
   el("tBubble").textContent = state.bubble >= 0 ? `Sprechblase ${state.bubble + 1}/${CONFIG.bubbles.length}` : "Sprechblase";
   el("tagHint").textContent = CONFIG.hashtag;
@@ -552,6 +626,15 @@ el("pSingle").addEventListener("click", () => { state.plural = false; syncUi(); 
 el("pGroup").addEventListener("click", () => { state.plural = true; syncUi(); });
 el("tHearts").addEventListener("click", () => { state.hearts = !state.hearts; syncUi(); });
 el("tEkg").addEventListener("click", () => { state.ekg = !state.ekg; syncUi(); });
+el("tGlasses").addEventListener("click", async () => {
+  const b = el("tGlasses");
+  state.glasses = !state.glasses; syncUi();
+  if (state.glasses && !faceReady) {
+    b.textContent = "Sonnenbrille lädt …";
+    try { await ensureFace(); b.textContent = "Sonnenbrille"; }
+    catch (e) { state.glasses = false; syncUi(); b.textContent = "Sonnenbrille nicht verfügbar"; setTimeout(() => { b.textContent = "Sonnenbrille"; }, 4000); }
+  }
+});
 el("tBubble").addEventListener("click", () => {
   // aus → Text 1 → Text 2 → Text 3 → aus
   state.bubble = state.bubble + 1 >= CONFIG.bubbles.length ? -1 : state.bubble + 1;
@@ -761,7 +844,7 @@ function resetIdle() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
     if (busy) return resetIdle();
-    const changed = state.plural || state.slogan !== 0 || state.bubble !== 0 || !state.hearts || state.ekg;
+    const changed = state.plural || state.slogan !== 0 || state.bubble !== 0 || !state.hearts || state.ekg || state.glasses;
     if (mode === "result" || changed || staffOpen) fullReset();
   }, CONFIG.idleSeconds * 1000);
 }
@@ -770,6 +853,7 @@ function resetIdle() {
 /* ===================== Start ===================== */
 syncUi(); fit(); resetIdle();
 startCam().then(() => requestAnimationFrame(loop));
+liveDetect();
 
 /* Offline-Betrieb: Service Worker speichert die App beim ersten Laden (nur über HTTPS bzw. localhost) */
 if ("serviceWorker" in navigator) {
