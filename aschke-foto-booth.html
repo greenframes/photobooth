@@ -151,11 +151,12 @@ const CONFIG = {
   hashtag: "#aschkepflegeschule",
   slogans: [
     { label: "Zukünftige Pflegefachkraft", text: "Zukünftige Pflegefachkraft bei Aschke" },
+    { label: "Pflegefachassistenz",        text: "Zukünftige Pflegefachassistenz bei Aschke" },
     { label: "Pflege kann ich!",           text: "Pflege kann ich!" },
     { label: "Pflege-Held:in",             text: "Pflege-Held:in in Ausbildung" },
     { label: "Mein Weg in die Pflege",    text: "Mein Weg in die Pflege beginnt hier" }
   ],
-  bubbles: ["Pflege? Kann ich!", "Mehr als nur eine Schule!", "Team Aschke 💗"],
+  bubbles: ["Ich werde Pflegeprofi!", "Pflege hat Zukunft!", "Team Aschke 💗", "Ohne Pflege geht nichts!", "Heldentaten inklusive!"],
   countdown: 3,          // Sekunden bis zum Foto
   idleSeconds: 75,       // danach Reset auf Startzustand (Foto und Name werden gelöscht)
   fileName: "aschke-pflege-selfie.jpg"
@@ -336,16 +337,18 @@ function drawScene(ctx, src, scale, count) {
   }
   const slogan = CONFIG.slogans[state.slogan].text;
   let fs = 48, lines;
-  do { ctx.font = `800 ${fs}px ${FONT}`; lines = wrap(ctx, slogan, 530); fs -= 2; } while (lines.length > 2 && fs > 30);
+  do { ctx.font = `800 ${fs}px ${FONT}`; lines = wrap(ctx, slogan, 510); fs -= 2; } while (lines.length > 2 && fs > 30);
   fs += 2;
   const lh = fs * 1.16, tagSize = 30;
   const blockH = lines.length * lh + 12 + tagSize;
   let ty = by + (bh - blockH) / 2;
-  ctx.fillStyle = CONFIG.ink; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.shadowColor = "rgba(0,0,0,.25)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
   ctx.font = `800 ${fs}px ${FONT}`;
   lines.forEach((l, i) => ctx.fillText(l, 506, ty + i * lh));
-  ctx.font = `600 ${tagSize}px ${FONT}`;
+  ctx.font = `700 ${tagSize}px ${FONT}`;
   ctx.fillText(CONFIG.hashtag, 506, ty + lines.length * lh + 12);
+  ctx.shadowColor = "transparent";
   ctx.restore();
 }
 

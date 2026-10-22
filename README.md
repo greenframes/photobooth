@@ -34,7 +34,7 @@ Am Stand empfiehlt sich der „Geführte Zugriff“ von iPadOS, damit Besucher d
 - [ ] Kamera startet nach der Berechtigungsabfrage (Frontkamera, gespiegelte Vorschau)
 - [ ] Hochformat und Querformat: Bild und Bedienelemente vollständig sichtbar, Auslöser nicht abgeschnitten
 - [ ] Namensschild mit langem Vornamen (z. B. 14 Zeichen) passt, Handschrift-Schrift wird angezeigt
-- [ ] Alle vier Sprüche und alle Sticker lassen sich schalten, Sprechblase wechselt durch die drei Texte
+- [ ] Alle fünf Sprüche und alle Sticker lassen sich schalten, Sprechblase wechselt durch alle fünf Texte
 - [ ] Countdown und Foto, Blitz-Effekt, Ergebnis im Format 4:5
 - [ ] „Teilen / Sichern“: Share-Sheet erscheint, AirDrop und „Bild sichern“ funktionieren
 - [ ] „Als Datei herunterladen“ speichert `aschke-pflege-selfie.jpg`
