@@ -1,6 +1,6 @@
 # Aschke Foto-Booth
 
-Selfie-Booth für den Messestand der Pflegeschule Aschke (Variante A: Rahmen mit Logo, Spruch und Stickern). Läuft komplett im Browser, auf dem iPad im Hoch- und Querformat. Es wird nichts hochgeladen. Als Web-App auf dem Home-Bildschirm installierbar und danach auch ohne Netz nutzbar.
+Selfie-Booth für den Messestand der Pflegeschule Aschke (Variante A: Rahmen mit Logo, Spruch und Stickern). Läuft komplett im Browser, auf dem iPad im Hoch- und Querformat. Es wird nichts hochgeladen, die Fotos bleiben auf dem iPad. Als Web-App auf dem Home-Bildschirm installierbar und danach auch ohne Netz nutzbar.
 
 - Testseite: https://greenframes.github.io/photobooth/
 - Die App ist `index.html` (eine Datei, Logo ist eingebettet). `aschke-foto-booth.html` leitet nur auf die Startseite weiter, damit ältere Links weiter funktionieren.
@@ -22,7 +22,22 @@ Alle Dateien müssen im selben Ordner liegen, Pfade sind relativ. Die App läuft
 1. Besucher wählt zuerst „Ich allein“ oder „Wir (zu zweit oder mehr)“, dann Spruch und Sticker (Sprechblase, Herzchen, EKG-Linie). Der Schalter stellt Sprüche und Sprechblasen zwischen Einzahl und Mehrzahl um („Zukünftige Pflegefachkraft“ / „Zukünftige Pflegefachkräfte“).
 2. „Foto machen“ startet einen Countdown von 3 Sekunden, danach erscheint das fertige Bild (1080 × 1350 px, JPG).
 3. „Teilen / Sichern“ öffnet das iPad-Share-Sheet (AirDrop, Nachrichten, Bild sichern), alternativ Download als Datei.
-4. Nach 75 Sekunden ohne Bedienung wird das Foto gelöscht und alle Einstellungen springen zurück auf „Ich allein“ und den Startzustand. Das gilt auch auf der Live-Ansicht, wenn jemand etwas verstellt und dann weggegangen ist.
+4. Jedes Foto wird automatisch auf dem iPad in der App gespeichert (siehe „Lokale Ablage“). Besucher können ihr Foto über „Mein Foto vom iPad löschen“ sofort wieder entfernen.
+5. Nach 75 Sekunden ohne Bedienung springt die App auf die Live-Ansicht zurück, alle Einstellungen gehen auf „Ich allein“ und den Startzustand. Gespeicherte Fotos bleiben erhalten. Das gilt auch auf der Live-Ansicht, wenn jemand etwas verstellt und dann weggegangen ist.
+
+## Lokale Ablage und Mitarbeiter-Galerie
+
+- Jedes Foto wird beim Aufnehmen in der App-Datenbank des iPads (IndexedDB) gespeichert. Es wird nichts übertragen. Die Fotos bleiben, bis Mitarbeiter sie löschen.
+- **Galerie öffnen:** 5× schnell (innerhalb von 3 Sekunden) auf das Logo oben links tippen, dann die PIN eingeben. Die Standard-PIN ist `1234` und steht in `CONFIG.staffPin`. **Vor der Messe ändern.**
+- In der Galerie: Fotos ansehen, einzeln teilen oder löschen, **„Alle als ZIP“** zum Sichern (per Teilen-Menü an AirDrop, Dateien-App oder Mac) und **„Alle löschen“**. Nach 75 Sekunden Inaktivität schließt sich die Galerie von selbst.
+- Der Platz reicht für mehrere tausend Fotos (ca. 100 bis 150 KB pro Foto).
+
+Wichtig zu wissen:
+
+- Die Fotos liegen nur im Speicher dieser installierten App. Wird die App oder die Website-Daten des iPads gelöscht oder lange nicht benutzt (Safari räumt Speicher gelegentlich auf), sind sie weg. **Am Messetag abends und nach der Messe das ZIP sichern.**
+- Die App fragt iPadOS um dauerhaften Speicher an. Auf dem Home-Bildschirm installierte Apps werden dabei deutlich besser behandelt als Safari-Tabs.
+- Das iPad am besten mit Code sperren, Geführter Zugriff an. Auf dem Gerät liegen Fotos von Besuchern, deshalb nach der Messe das ZIP sichern und danach „Alle löschen“.
+- Datenschutz: Besucher sollten am Stand einen kurzen Hinweis sehen, dass Fotos auf dem iPad gespeichert werden und auf Wunsch gelöscht werden. Die Abstimmung (Einwilligung, Aufbewahrungsdauer, Verwendung in der Galerie) liegt bei euch bzw. dem Datenschutzbeauftragten.
 
 ## Auf dem iPad installieren (Home-Bildschirm)
 
@@ -60,6 +75,10 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 - [ ] Alle fünf Sprüche und alle Sticker lassen sich schalten, Sprechblase wechselt durch alle fünf Texte
 - [ ] Schalter „Ich allein / Wir“ stellt Spruchauswahl, Vorschau und Sprechblase sofort auf Einzahl bzw. Mehrzahl um
 - [ ] Nach einem Foto und 75 Sekunden Pause steht der Schalter wieder auf „Ich allein“
+- [ ] Foto wird gespeichert (Hinweis unter dem Foto), „Mein Foto vom iPad löschen“ entfernt es
+- [ ] Galerie: 5× auf Logo tippen, PIN, Fotos erscheinen, Ansehen/Teilen/Löschen funktioniert
+- [ ] ZIP: „Alle als ZIP“ erzeugt Datei, Teilen an AirDrop/Mac, ZIP lässt sich öffnen
+- [ ] Fotos sind nach App-Neustart und im Flugmodus noch da
 - [ ] Countdown und Foto, Blitz-Effekt, Ergebnis im Format 4:5
 - [ ] „Teilen / Sichern“: Share-Sheet erscheint, AirDrop und „Bild sichern“ funktionieren
 - [ ] „Als Datei herunterladen“ speichert `aschke-pflege-selfie.jpg`
@@ -75,4 +94,5 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 ## Offen
 
 - Schrift der Website eintragen (Name oder Font-Datei nötig)
-- Optional: QR-Code-Abholung mit kurzzeitigem Upload (WordPress-Endpunkt, automatische Löschung nach 24 Stunden, Einwilligungshinweis). Dafür wird beim Teilen Netz benötigt.
+- Optional: nach der Messe ausgewählte Fotos aus dem ZIP in eine eigene Galerie hochladen und den QR-Code zur Galerie am Stand zeigen (der QR-Code ließe sich fest auf dem Ergebnis-Bildschirm einblenden)
+- Optional: Kasack-Anprobe, vorerst verworfen
