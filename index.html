@@ -107,6 +107,13 @@
 
     <!-- Live-Ansicht -->
     <section class="panel" id="livePanel">
+      <div class="group" role="radiogroup" aria-label="Wer ist auf dem Foto?">
+        <h2>Wer ist auf dem Foto?</h2>
+        <div class="chips">
+          <button class="chip" type="button" role="radio" id="pSingle" aria-checked="true">Ich allein</button>
+          <button class="chip" type="button" role="radio" id="pGroup" aria-checked="false">Wir (zu zweit oder mehr)</button>
+        </div>
+      </div>
       <div class="group" role="radiogroup" aria-label="Spruch">
         <h2>Spruch</h2>
         <div class="chips" id="sloganChips"></div>
@@ -145,14 +152,26 @@ const CONFIG = {
   pink: "#f39ca5",
   ink: "#3a3a3a",
   hashtag: "#pflegeschuleaschke",
+  // Jeweils [Einzahl, Mehrzahl]. Der Schalter „Ich allein / Wir“ wählt die Variante.
   slogans: [
-    { label: "Zukünftige Pflegefachkraft", text: "Zukünftige Pflegefachkraft" },
-    { label: "Pflegefachassistenz",        text: "Zukünftige Pflegefachassistenz" },
-    { label: "Pflege kann ich!",           text: "Pflege kann ich!" },
-    { label: "Pflege-Held:in",             text: "Pflege-Held:in in Ausbildung" },
-    { label: "Mein Weg in die Pflege",    text: "Mein Weg in die Pflege beginnt hier" }
+    { label: ["Zukünftige Pflegefachkraft", "Zukünftige Pflegefachkräfte"],
+      text:  ["Zukünftige Pflegefachkraft", "Zukünftige Pflegefachkräfte"] },
+    { label: ["Pflegefachassistenz", "Pflegefachassistenzen"],
+      text:  ["Zukünftige Pflegefachassistenz", "Zukünftige Pflegefachassistenzen"] },
+    { label: ["Pflege kann ich!", "Pflege können wir!"],
+      text:  ["Pflege kann ich!", "Pflege können wir!"] },
+    { label: ["Pflege-Held:in", "Pflege-Held:innen"],
+      text:  ["Pflege-Held:in in Ausbildung", "Pflege-Held:innen in Ausbildung"] },
+    { label: ["Mein Weg in die Pflege", "Unser Weg in die Pflege"],
+      text:  ["Mein Weg in die Pflege beginnt hier", "Unser Weg in die Pflege beginnt hier"] }
   ],
-  bubbles: ["Ich werde Pflegeprofi!", "Pflege hat Zukunft!", "Team Aschke 💗", "Ohne Pflege geht nichts!", "Heldentaten inklusive!"],
+  bubbles: [
+    ["Ich werde Pflegeprofi!", "Wir werden Pflegeprofis!"],
+    ["Pflege hat Zukunft!", "Pflege hat Zukunft!"],
+    ["Team Aschke 💗", "Team Aschke 💗"],
+    ["Ohne Pflege geht nichts!", "Ohne Pflege geht nichts!"],
+    ["Heldentaten inklusive!", "Heldentaten inklusive!"]
+  ],
   countdown: 3,          // Sekunden bis zum Foto
   idleSeconds: 75,       // danach Reset auf Startzustand (das Foto wird gelöscht)
   fileName: "aschke-pflege-selfie.jpg"
@@ -161,7 +180,8 @@ const CONFIG = {
 const FONT = 'system-ui, "Helvetica Neue", Arial, sans-serif';
 
 /* ===================== Zustand ===================== */
-const state = { slogan: 0, bubble: 0, hearts: true, ekg: false, count: 0 };
+const state = { plural: false, slogan: 0, bubble: 0, hearts: true, ekg: false, count: 0 };
+const pick = pair => pair[state.plural ? 1 : 0];   // Einzahl oder Mehrzahl
 const el = id => document.getElementById(id);
 const live = el("live"), lctx = live.getContext("2d");
 const video = el("video"), stage = el("stage"), resultImg = el("result");
@@ -249,7 +269,7 @@ function drawEkg(ctx) {
   ctx.restore();
 }
 function drawBubble(ctx) {
-  const text = CONFIG.bubbles[state.bubble];
+  const text = pick(CONFIG.bubbles[state.bubble]);
   ctx.save();
   ctx.font = `800 44px ${FONT}`;
   const lines = wrap(ctx, text, 430), lh = 54;
@@ -307,7 +327,7 @@ function drawScene(ctx, src, scale, count) {
     const lw = 366, lh = lw * logo.naturalHeight / logo.naturalWidth;
     ctx.drawImage(logo, 60 + (410 - lw) / 2, by + 22 + (190 - lh) / 2, lw, lh);
   }
-  const slogan = CONFIG.slogans[state.slogan].text;
+  const slogan = pick(CONFIG.slogans[state.slogan].text);
   let fs = 48, lines;
   do { ctx.font = `800 ${fs}px ${FONT}`; lines = wrap(ctx, slogan, 510); fs -= 2; } while (lines.length > 2 && fs > 30);
   fs += 2;
@@ -407,7 +427,7 @@ function showLive() {
   if (!camOk) startCam();
 }
 function fullReset() {
-  state.slogan = 0; state.bubble = 0; state.hearts = true; state.ekg = false;
+  state.plural = false; state.slogan = 0; state.bubble = 0; state.hearts = true; state.ekg = false;
   syncUi(); showLive();
 }
 
@@ -434,7 +454,12 @@ el("shutter").addEventListener("click", capture);
 
 /* ===================== Bedienelemente ===================== */
 function syncUi() {
-  [...el("sloganChips").children].forEach((b, i) => b.setAttribute("aria-checked", String(i === state.slogan)));
+  [...el("sloganChips").children].forEach((b, i) => {
+    b.textContent = pick(CONFIG.slogans[i].label);
+    b.setAttribute("aria-checked", String(i === state.slogan));
+  });
+  el("pSingle").setAttribute("aria-checked", String(!state.plural));
+  el("pGroup").setAttribute("aria-checked", String(state.plural));
   el("tHearts").setAttribute("aria-pressed", String(state.hearts));
   el("tEkg").setAttribute("aria-pressed", String(state.ekg));
   el("tBubble").setAttribute("aria-pressed", String(state.bubble >= 0));
@@ -443,10 +468,12 @@ function syncUi() {
 }
 CONFIG.slogans.forEach((s, i) => {
   const b = document.createElement("button");
-  b.type = "button"; b.className = "chip"; b.textContent = s.label; b.setAttribute("role", "radio");
+  b.type = "button"; b.className = "chip"; b.setAttribute("role", "radio");
   b.addEventListener("click", () => { state.slogan = i; syncUi(); });
   el("sloganChips").appendChild(b);
 });
+el("pSingle").addEventListener("click", () => { state.plural = false; syncUi(); });
+el("pGroup").addEventListener("click", () => { state.plural = true; syncUi(); });
 el("tHearts").addEventListener("click", () => { state.hearts = !state.hearts; syncUi(); });
 el("tEkg").addEventListener("click", () => { state.ekg = !state.ekg; syncUi(); });
 el("tBubble").addEventListener("click", () => {
@@ -461,7 +488,8 @@ function resetIdle() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
     if (busy) return resetIdle();
-    if (mode === "result") fullReset();
+    const changed = state.plural || state.slogan !== 0 || state.bubble !== 0 || !state.hearts || state.ekg;
+    if (mode === "result" || changed) fullReset();
   }, CONFIG.idleSeconds * 1000);
 }
 ["pointerdown", "keydown", "input"].forEach(ev => document.addEventListener(ev, resetIdle, { passive: true }));

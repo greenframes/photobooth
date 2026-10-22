@@ -19,10 +19,10 @@ Alle Dateien müssen im selben Ordner liegen, Pfade sind relativ. Die App läuft
 
 ## Ablauf am Stand
 
-1. Besucher wählt Spruch und Sticker (Sprechblase, Herzchen, EKG-Linie).
+1. Besucher wählt zuerst „Ich allein“ oder „Wir (zu zweit oder mehr)“, dann Spruch und Sticker (Sprechblase, Herzchen, EKG-Linie). Der Schalter stellt Sprüche und Sprechblasen zwischen Einzahl und Mehrzahl um („Zukünftige Pflegefachkraft“ / „Zukünftige Pflegefachkräfte“).
 2. „Foto machen“ startet einen Countdown von 3 Sekunden, danach erscheint das fertige Bild (1080 × 1350 px, JPG).
 3. „Teilen / Sichern“ öffnet das iPad-Share-Sheet (AirDrop, Nachrichten, Bild sichern), alternativ Download als Datei.
-4. Nach 75 Sekunden ohne Bedienung wird das Foto gelöscht und die Booth springt zurück in den Startzustand.
+4. Nach 75 Sekunden ohne Bedienung wird das Foto gelöscht und alle Einstellungen springen zurück auf „Ich allein“ und den Startzustand. Das gilt auch auf der Live-Ansicht, wenn jemand etwas verstellt und dann weggegangen ist.
 
 ## Auf dem iPad installieren (Home-Bildschirm)
 
@@ -38,7 +38,7 @@ Der Service Worker liefert die gespeicherte Version sofort aus und holt im Hinte
 
 ## Einstellungen
 
-Oben im Skript in `index.html`, Block `CONFIG`: Sprüche, Sprechblasen-Texte, Hashtag, Countdown, Zeit bis zum Auto-Reset, Dateiname. Die Schrift steht in der Konstante `FONT` (aktuell Systemschrift des Geräts).
+Oben im Skript in `index.html`, Block `CONFIG`: Sprüche und Sprechblasen-Texte (jeweils als Paar [Einzahl, Mehrzahl]), Hashtag, Countdown, Zeit bis zum Auto-Reset, Dateiname. Die Schrift steht in der Konstante `FONT` (aktuell Systemschrift des Geräts).
 
 ## Einbindung auf dem eigenen Server
 
@@ -58,6 +58,8 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 - [ ] Kamera startet nach der Berechtigungsabfrage (Frontkamera, gespiegelte Vorschau)
 - [ ] Hochformat und Querformat: Bild und Bedienelemente vollständig sichtbar, Auslöser nicht abgeschnitten
 - [ ] Alle fünf Sprüche und alle Sticker lassen sich schalten, Sprechblase wechselt durch alle fünf Texte
+- [ ] Schalter „Ich allein / Wir“ stellt Spruchauswahl, Vorschau und Sprechblase sofort auf Einzahl bzw. Mehrzahl um
+- [ ] Nach einem Foto und 75 Sekunden Pause steht der Schalter wieder auf „Ich allein“
 - [ ] Countdown und Foto, Blitz-Effekt, Ergebnis im Format 4:5
 - [ ] „Teilen / Sichern“: Share-Sheet erscheint, AirDrop und „Bild sichern“ funktionieren
 - [ ] „Als Datei herunterladen“ speichert `aschke-pflege-selfie.jpg`
