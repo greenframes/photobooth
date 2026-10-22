@@ -57,13 +57,6 @@
   }
   .chip[aria-pressed="true"],.chip[aria-checked="true"]{background:var(--pink);border-color:var(--pink);}
   .chip:active{transform:scale(.97)}
-  .name-row{display:flex;gap:8px;align-items:center}
-  .name-row input{
-    flex:1;min-height:56px;border-radius:14px;border:2px solid var(--pink);padding:0 16px;
-    font:600 22px var(--font);color:var(--ink);background:#fff;-webkit-user-select:text;user-select:text;
-  }
-  .name-row input:focus{outline:3px solid var(--pink-soft);border-color:var(--pink-deep)}
-
   .shutter-wrap{display:flex;justify-content:center;padding:8px 12px 18px}
   .shutter{
     appearance:none;border:0;border-radius:999px;background:var(--pink);color:var(--ink);
@@ -121,15 +114,10 @@
       <div class="group">
         <h2>Sticker</h2>
         <div class="chips">
-          <button class="chip" type="button" id="tTag" aria-pressed="true">Namensschild</button>
           <button class="chip" type="button" id="tBubble" aria-pressed="true">Sprechblase</button>
           <button class="chip" type="button" id="tHearts" aria-pressed="true">Herzchen</button>
           <button class="chip" type="button" id="tEkg" aria-pressed="false">EKG-Linie</button>
         </div>
-      </div>
-      <div class="group" id="nameGroup">
-        <h2>Dein Vorname</h2>
-        <div class="name-row"><input id="nameInput" type="text" maxlength="14" placeholder="optional" autocomplete="off" autocapitalize="words" enterkeyhint="done"></div>
       </div>
       <div class="shutter-wrap">
         <button class="shutter" id="shutter" type="button"><span aria-hidden="true">📸</span><span id="shutterLabel">Foto machen</span></button>
@@ -171,10 +159,7 @@ const CONFIG = {
 };
 // Schrift: hier die Schrift der Website eintragen, sobald bekannt (muss auf dem Gerät vorhanden oder per @font-face geladen sein)
 const FONT = 'system-ui, "Helvetica Neue", Arial, sans-serif';
-const HAND = '"Bradley Hand","Noteworthy","Segoe Print","Comic Sans MS",cursive';
-
-/* ===================== Zustand ===================== */
-const state = { slogan: 0, tag: true, bubble: 0, hearts: true, ekg: false, name: "", count: 0 };
+const state = { slogan: 0, bubble: 0, hearts: true, ekg: false, count: 0 };
 const el = id => document.getElementById(id);
 const live = el("live"), lctx = live.getContext("2d");
 const video = el("video"), stage = el("stage"), resultImg = el("result");
@@ -261,28 +246,6 @@ function drawEkg(ctx) {
   ctx.fillStyle = CONFIG.pink; ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = "#fff"; ctx.stroke();
   ctx.restore();
 }
-function drawNameTag(ctx) {
-  const w = 430, h = 205;
-  ctx.save();
-  ctx.translate(76 + w / 2, 895); ctx.rotate(-0.06);
-  ctx.shadowColor = "rgba(0,0,0,.28)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6;
-  rr(ctx, -w / 2, -h / 2, w, h, 26); ctx.fillStyle = "#fff"; ctx.fill();
-  ctx.shadowColor = "transparent";
-  // rosa Kopfstreifen
-  ctx.save(); rr(ctx, -w / 2, -h / 2, w, h, 26); ctx.clip();
-  ctx.fillStyle = CONFIG.pink; ctx.fillRect(-w / 2, -h / 2, w, 62);
-  ctx.restore();
-  ctx.fillStyle = CONFIG.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.font = `800 31px ${FONT}`; ctx.fillText("HALLO, ICH BIN", 0, -h / 2 + 32);
-  // Name, passend skaliert
-  const name = state.name || "Pflege-Profi";
-  let fs = 88; ctx.font = `700 ${fs}px ${HAND}`;
-  while (ctx.measureText(name).width > w - 50 && fs > 36) { fs -= 4; ctx.font = `700 ${fs}px ${HAND}`; }
-  ctx.fillText(name, 0, 38);
-  // Pin-Loch
-  ctx.beginPath(); ctx.arc(0, -h / 2 - 2, 9, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
-  ctx.restore();
-}
 function drawBubble(ctx) {
   const text = CONFIG.bubbles[state.bubble];
   ctx.save();
@@ -326,7 +289,6 @@ function drawScene(ctx, src, scale, count) {
   }
   if (state.hearts) drawHearts(ctx);
   if (state.ekg) drawEkg(ctx);
-  if (state.tag) drawNameTag(ctx);
   if (state.bubble >= 0) drawBubble(ctx);
   if (count > 0) {
     ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.arc(540, 576, 260, 0, Math.PI * 2); ctx.fill();
@@ -443,8 +405,8 @@ function showLive() {
   if (!camOk) startCam();
 }
 function fullReset() {
-  state.slogan = 0; state.tag = true; state.bubble = 0; state.hearts = true; state.ekg = false; state.name = "";
-  el("nameInput").value = ""; syncUi(); showLive();
+  state.slogan = 0; state.bubble = 0; state.hearts = true; state.ekg = false;
+  syncUi(); showLive();
 }
 
 /* ===================== Teilen / Speichern ===================== */
@@ -471,12 +433,10 @@ el("shutter").addEventListener("click", capture);
 /* ===================== Bedienelemente ===================== */
 function syncUi() {
   [...el("sloganChips").children].forEach((b, i) => b.setAttribute("aria-checked", String(i === state.slogan)));
-  el("tTag").setAttribute("aria-pressed", String(state.tag));
   el("tHearts").setAttribute("aria-pressed", String(state.hearts));
   el("tEkg").setAttribute("aria-pressed", String(state.ekg));
   el("tBubble").setAttribute("aria-pressed", String(state.bubble >= 0));
   el("tBubble").textContent = state.bubble >= 0 ? `Sprechblase ${state.bubble + 1}/${CONFIG.bubbles.length}` : "Sprechblase";
-  el("nameGroup").hidden = !state.tag;
   el("tagHint").textContent = CONFIG.hashtag;
 }
 CONFIG.slogans.forEach((s, i) => {
@@ -485,7 +445,6 @@ CONFIG.slogans.forEach((s, i) => {
   b.addEventListener("click", () => { state.slogan = i; syncUi(); });
   el("sloganChips").appendChild(b);
 });
-el("tTag").addEventListener("click", () => { state.tag = !state.tag; syncUi(); });
 el("tHearts").addEventListener("click", () => { state.hearts = !state.hearts; syncUi(); });
 el("tEkg").addEventListener("click", () => { state.ekg = !state.ekg; syncUi(); });
 el("tBubble").addEventListener("click", () => {
@@ -493,8 +452,6 @@ el("tBubble").addEventListener("click", () => {
   state.bubble = state.bubble + 1 >= CONFIG.bubbles.length ? -1 : state.bubble + 1;
   syncUi();
 });
-el("nameInput").addEventListener("input", e => { state.name = e.target.value.trim(); });
-el("nameInput").addEventListener("keydown", e => { if (e.key === "Enter") e.target.blur(); });
 
 /* ===================== Inaktivität ===================== */
 let idleTimer = null;
@@ -502,7 +459,7 @@ function resetIdle() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
     if (busy) return resetIdle();
-    if (mode === "result" || state.name) fullReset();
+    if (mode === "result") fullReset();
   }, CONFIG.idleSeconds * 1000);
 }
 ["pointerdown", "keydown", "input"].forEach(ev => document.addEventListener(ev, resetIdle, { passive: true }));
