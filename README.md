@@ -13,17 +13,22 @@ Selfie-Booth für den Messestand der Pflegeschule Aschke (Variante A: Rahmen mit
 | `manifest.webmanifest` | Name, Icons und Startverhalten der installierten App |
 | `sw.js` | Service Worker, speichert die App für den Offline-Betrieb |
 | `icons/` | Icons für den Home-Bildschirm (aus dem Logo-Symbol) |
+| `vendor/face-api.js`, `models/` | Gesichtserkennung für die Sonnenbrille (face-api, MIT-Lizenz, rund 1,7 MB), läuft komplett im Browser |
 | `aschke-foto-booth.html` | Weiterleitung für alte Links |
 
 Alle Dateien müssen im selben Ordner liegen, Pfade sind relativ. Die App läuft dadurch unter jedem Unterordner (GitHub Pages, eigener Server).
 
 ## Ablauf am Stand
 
-1. Besucher wählt zuerst „Ich allein“ oder „Wir (zu zweit oder mehr)“, dann Spruch und Sticker (Sprechblase, Herzchen, EKG-Linie). Der Schalter stellt Sprüche und Sprechblasen zwischen Einzahl und Mehrzahl um („Zukünftige Pflegefachkraft“ / „Zukünftige Pflegefachkräfte“).
+1. Besucher wählt zuerst „Ich allein“ oder „Wir (zu zweit oder mehr)“, dann Spruch und Sticker (Sprechblase, Herzchen, EKG-Linie, Sonnenbrille). Der Schalter stellt Sprüche und Sprechblasen zwischen Einzahl und Mehrzahl um („Zukünftige Pflegefachkraft“ / „Zukünftige Pflegefachkräfte“).
 2. „Foto machen“ startet einen Countdown von 3 Sekunden, danach erscheint das fertige Bild (1080 × 1350 px, JPG).
 3. „Teilen / Sichern“ öffnet das iPad-Share-Sheet (AirDrop, Nachrichten, Bild sichern), alternativ Download als Datei.
 4. Jedes Foto wird automatisch auf dem iPad in der App gespeichert (siehe „Lokale Ablage“). Besucher können ihr Foto über „Mein Foto vom iPad löschen“ sofort wieder entfernen.
 5. Nach 75 Sekunden ohne Bedienung springt die App auf die Live-Ansicht zurück, alle Einstellungen gehen auf „Ich allein“ und den Startzustand. Gespeicherte Fotos bleiben erhalten. Das gilt auch auf der Live-Ansicht, wenn jemand etwas verstellt und dann weggegangen ist.
+
+## Sonnenbrille
+
+Der Sticker „Sonnenbrille“ setzt eine pinke Brille auf jedes erkannte Gesicht (Position, Größe und Neigung folgen den Augen, schon in der Live-Vorschau). Die Erkennung läuft im Browser auf dem iPad, es wird nichts übertragen, und sie funktioniert auch offline. Die Brille wird gezeichnet (Funktion `drawGlasses` in `index.html`), es ist kein Bild nötig. Beim ersten Einschalten wird die Erkennung geladen, das dauert einen kurzen Moment („Sonnenbrille lädt …“). Beim Foto wird die Erkennung noch einmal auf dem Bild selbst ausgeführt. Bei starker Kopfdrehung wirkt die flache Brille unnatürlich, Haare oder Hände vor dem Gesicht liegen unter der Brille.
 
 ## Lokale Ablage und Mitarbeiter-Galerie
 
@@ -79,6 +84,8 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 - [ ] Galerie: 5× auf Logo tippen, PIN, Fotos erscheinen, Ansehen/Teilen/Löschen funktioniert
 - [ ] ZIP: „Alle als ZIP“ erzeugt Datei, Teilen an AirDrop/Mac, ZIP lässt sich öffnen
 - [ ] QR-Code auf dem Ergebnis-Bildschirm lässt sich mit einem Handy scannen (Abstand ca. 50 cm) und öffnet die Veranstaltungsseite
+- [ ] Sonnenbrille: sitzt in der Live-Vorschau auf den Augen, folgt dem Kopf flüssig (sonst Erkennung seltener laufen lassen), auch bei zwei bis drei Personen, und ist auf dem fertigen Foto an derselben Stelle
+- [ ] Sonnenbrille im Flugmodus nach vorherigem Laden mit Netz
 - [ ] Fotos sind nach App-Neustart und im Flugmodus noch da
 - [ ] Countdown und Foto, Blitz-Effekt, Ergebnis im Format 4:5
 - [ ] „Teilen / Sichern“: Share-Sheet erscheint, AirDrop und „Bild sichern“ funktionieren
