@@ -146,19 +146,21 @@ const CONFIG = {
   ink: "#3a3a3a",
   hashtag: "#pflegeschuleaschke",
   slogans: [
-    { label: "Zukünftige Pflegefachkraft", text: "Zukünftige Pflegefachkraft bei Aschke" },
-    { label: "Pflegefachassistenz",        text: "Zukünftige Pflegefachassistenz bei Aschke" },
+    { label: "Zukünftige Pflegefachkraft", text: "Zukünftige Pflegefachkraft" },
+    { label: "Pflegefachassistenz",        text: "Zukünftige Pflegefachassistenz" },
     { label: "Pflege kann ich!",           text: "Pflege kann ich!" },
     { label: "Pflege-Held:in",             text: "Pflege-Held:in in Ausbildung" },
     { label: "Mein Weg in die Pflege",    text: "Mein Weg in die Pflege beginnt hier" }
   ],
   bubbles: ["Ich werde Pflegeprofi!", "Pflege hat Zukunft!", "Team Aschke 💗", "Ohne Pflege geht nichts!", "Heldentaten inklusive!"],
   countdown: 3,          // Sekunden bis zum Foto
-  idleSeconds: 75,       // danach Reset auf Startzustand (Foto und Name werden gelöscht)
+  idleSeconds: 75,       // danach Reset auf Startzustand (das Foto wird gelöscht)
   fileName: "aschke-pflege-selfie.jpg"
 };
 // Schrift: hier die Schrift der Website eintragen, sobald bekannt (muss auf dem Gerät vorhanden oder per @font-face geladen sein)
 const FONT = 'system-ui, "Helvetica Neue", Arial, sans-serif';
+
+/* ===================== Zustand ===================== */
 const state = { slogan: 0, bubble: 0, hearts: true, ekg: false, count: 0 };
 const el = id => document.getElementById(id);
 const live = el("live"), lctx = live.getContext("2d");
