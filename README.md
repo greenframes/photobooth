@@ -53,7 +53,7 @@ Der Service Worker liefert die gespeicherte Version sofort aus und holt im Hinte
 
 ## Einstellungen
 
-Oben im Skript in `index.html`, Block `CONFIG`: Sprüche und Sprechblasen-Texte (jeweils als Paar [Einzahl, Mehrzahl]), Hashtag, Countdown, Zeit bis zum Auto-Reset, Dateiname. Die Schrift steht in der Konstante `FONT` (aktuell Systemschrift des Geräts).
+Oben im Skript in `index.html`, Block `CONFIG` (der QR-Code ist als Grafik fest eingebettet, bei geänderter `galleryUrl` muss er neu erzeugt werden): Sprüche und Sprechblasen-Texte (jeweils als Paar [Einzahl, Mehrzahl]), Hashtag, Countdown, Zeit bis zum Auto-Reset, Dateiname. Die Schrift steht in der Konstante `FONT` (aktuell Systemschrift des Geräts).
 
 ## Einbindung auf dem eigenen Server
 
@@ -78,6 +78,7 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 - [ ] Foto wird gespeichert (Hinweis unter dem Foto), „Mein Foto vom iPad löschen“ entfernt es
 - [ ] Galerie: 5× auf Logo tippen, PIN, Fotos erscheinen, Ansehen/Teilen/Löschen funktioniert
 - [ ] ZIP: „Alle als ZIP“ erzeugt Datei, Teilen an AirDrop/Mac, ZIP lässt sich öffnen
+- [ ] QR-Code auf dem Ergebnis-Bildschirm lässt sich mit einem Handy scannen (Abstand ca. 50 cm) und öffnet die Veranstaltungsseite
 - [ ] Fotos sind nach App-Neustart und im Flugmodus noch da
 - [ ] Countdown und Foto, Blitz-Effekt, Ergebnis im Format 4:5
 - [ ] „Teilen / Sichern“: Share-Sheet erscheint, AirDrop und „Bild sichern“ funktionieren
@@ -94,5 +95,5 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 ## Offen
 
 - Schrift der Website eintragen (Name oder Font-Datei nötig)
-- Optional: nach der Messe ausgewählte Fotos aus dem ZIP in eine eigene Galerie hochladen und den QR-Code zur Galerie am Stand zeigen (der QR-Code ließe sich fest auf dem Ergebnis-Bildschirm einblenden)
+- Nach der Messe die Fotos aus dem ZIP auf https://aschke-seminare.de/unsere-veranstaltungen-2/ einstellen (nur Fotos, mit denen die Besucher einverstanden sind). Der QR-Code auf dem Ergebnis-Bildschirm führt schon dorthin.
 - Optional: Kasack-Anprobe, vorerst verworfen

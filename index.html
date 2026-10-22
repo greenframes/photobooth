@@ -108,6 +108,10 @@
   .cell{appearance:none;border:2px solid var(--pink-soft);background:#fff;border-radius:14px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:4px;font:600 14px var(--font);color:var(--gray)}
   .cell img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;display:block}
   .empty{text-align:center;color:var(--gray);font-size:19px;padding:40px 20px}
+  .qrbox{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--pink);border-radius:18px;padding:12px 14px;margin-top:12px;text-align:left}
+  .qrbox svg{flex:none;width:132px;height:132px;background:#fff;padding:6px;border-radius:8px}
+  .qrbox p{margin:0;color:var(--ink);font-size:17px;line-height:1.35}
+  .qrbox small{display:block;color:var(--gray);font-size:14px;margin-top:4px;word-break:break-all}
   [hidden]{display:none !important}
 </style>
 </head>
@@ -163,6 +167,7 @@
       <button class="btn" id="again" type="button">Nochmal</button>
       <button class="linkbtn" id="delMine" type="button" hidden>Mein Foto vom iPad löschen</button>
       <p class="hint">Markiere uns gern: <strong id="tagHint">#pflegeschuleaschke</strong><br>Tipp: Über „Teilen“ geht’s per AirDrop direkt aufs eigene Handy.</p>
+      <div class="qrbox"><div id="qrSvg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges" role="img" aria-label="QR-Code zur Foto-Galerie"><path class="qrline" stroke="#3a3a3a" d="M0 0.5h7m1 0h1m1 0h1m1 0h2m3 0h1m3 0h2m3 0h7m-33 1h1m5 0h1m1 0h1m1 0h5m3 0h2m2 0h1m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h2m3 0h2m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h2m1 0h3m1 0h1m1 0h2m1 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m2 0h4m1 0h2m4 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m3 0h2m1 0h1m1 0h2m1 0h1m1 0h1m2 0h2m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-22 1h3m1 0h2m1 0h1m3 0h1m-23 1h1m2 0h9m2 0h1m1 0h2m4 0h1m1 0h2m2 0h1m1 0h3m-33 1h3m2 0h1m1 0h1m3 0h5m1 0h3m1 0h3m4 0h3m-30 1h1m1 0h1m2 0h1m5 0h2m1 0h2m3 0h1m1 0h4m2 0h3m1 0h1m-32 1h1m1 0h1m3 0h1m1 0h2m2 0h1m4 0h3m1 0h3m1 0h2m2 0h2m-32 1h1m1 0h6m2 0h1m1 0h2m1 0h1m1 0h1m2 0h1m5 0h2m4 0h1m-33 1h1m3 0h1m3 0h1m1 0h1m1 0h3m3 0h1m1 0h2m1 0h1m3 0h1m1 0h1m-28 1h1m1 0h3m2 0h3m1 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m1 0h3m-30 1h2m1 0h1m2 0h2m2 0h1m1 0h1m2 0h1m2 0h2m4 0h1m2 0h3m1 0h1m-31 1h1m1 0h4m2 0h7m1 0h1m1 0h1m1 0h1m1 0h5m-29 1h2m2 0h1m2 0h2m1 0h3m2 0h1m1 0h4m5 0h1m1 0h1m1 0h1m1 0h1m-33 1h3m1 0h4m2 0h2m2 0h2m1 0h3m3 0h1m1 0h3m1 0h2m1 0h1m-33 1h3m1 0h1m2 0h2m1 0h3m1 0h3m2 0h2m1 0h3m3 0h4m-30 1h1m2 0h3m2 0h2m2 0h1m1 0h1m1 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h1m-32 1h3m2 0h1m2 0h1m2 0h4m2 0h1m1 0h2m1 0h2m1 0h1m1 0h4m-31 1h1m1 0h1m1 0h3m2 0h4m1 0h1m8 0h1m2 0h4m1 0h2m-33 1h1m1 0h1m1 0h2m2 0h1m1 0h1m3 0h2m1 0h2m1 0h1m2 0h3m2 0h1m1 0h1m-31 1h4m2 0h5m2 0h2m1 0h1m3 0h1m2 0h7m2 0h1m-25 1h1m1 0h1m2 0h1m1 0h1m1 0h2m5 0h1m3 0h1m1 0h1m-31 1h7m1 0h1m1 0h2m2 0h2m1 0h1m1 0h3m1 0h2m1 0h1m1 0h1m1 0h1m-31 1h1m5 0h1m1 0h1m1 0h5m2 0h2m4 0h2m3 0h5m-33 1h1m1 0h3m1 0h1m1 0h3m1 0h6m1 0h2m1 0h7m2 0h2m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h1m2 0h1m1 0h1m2 0h3m-33 1h1m1 0h3m1 0h1m2 0h2m1 0h4m1 0h1m1 0h3m1 0h2m2 0h2m1 0h3m-33 1h1m5 0h1m3 0h1m1 0h2m4 0h1m3 0h1m3 0h7m-33 1h7m1 0h5m2 0h3m5 0h3m1 0h3"/></svg></div><p><strong>Mehr Fotos von der Messe?</strong><br>Nach der Messe findest du alle Fotos auf unserer Seite. QR-Code scannen und vormerken.<small>aschke-seminare.de/unsere-veranstaltungen-2</small></p></div>
       <p class="hint" id="saveNote">Dein Foto wird auf diesem iPad gespeichert und nicht ins Internet hochgeladen.</p>
     </section>
   </main>
@@ -239,6 +244,7 @@ const CONFIG = {
   ],
   countdown: 3,          // Sekunden bis zum Foto
   idleSeconds: 75,       // danach Reset auf Startzustand (das Foto wird gelöscht)
+  galleryUrl: "https://aschke-seminare.de/unsere-veranstaltungen-2/",   // Ziel des QR-Codes (der QR-Code ist fest im HTML eingebettet, bei Änderung neu erzeugen)
   staffPin: "1234",      // PIN für die Mitarbeiter-Galerie (5× schnell auf das Logo oben links tippen). Bitte ändern! Leer = ohne PIN
   fileName: "aschke-pflege-selfie.jpg"
 };
