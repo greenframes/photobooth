@@ -87,6 +87,7 @@
   .btn.small{width:auto;min-height:52px;padding:0 20px;font-size:18px}
   .btn.danger{border-color:#d96b75}
   .btn[disabled]{opacity:.45}
+  .btn.halloon{background:#ff8a1f;border-color:#ff8a1f;color:#fff}
   .linkbtn{appearance:none;background:none;border:0;padding:10px;color:var(--gray);font:600 17px var(--font);text-decoration:underline;cursor:pointer;width:100%}
 
   /* Overlays: Mitarbeiter-Zugang, Galerie, Einzelansicht, ZIP */
@@ -185,6 +186,7 @@
 <div class="overlay full" id="staff" hidden role="dialog" aria-modal="true" aria-label="Foto-Galerie">
   <div class="sbar">
     <strong>Foto-Galerie</strong><span class="info" id="staffInfo"></span>
+    <button class="btn small" id="halloBtn" type="button">Halloween: aus</button>
     <button class="btn small" id="zipBtn" type="button">Alle als ZIP</button>
     <button class="btn small danger" id="clearBtn" type="button">Alle löschen</button>
     <button class="btn small primary" id="staffClose" type="button">Schließen</button>
@@ -242,6 +244,28 @@ const CONFIG = {
     ["Ohne Pflege geht nichts!", "Ohne Pflege geht nichts!"],
     ["Heldentaten inklusive!", "Heldentaten inklusive!"]
   ],
+  // Halloween-Modus (im Mitarbeiter-Bereich ein- und ausschaltbar): gleiche Struktur, andere Texte und Deko
+  halloween: {
+    slogans: [
+      { label: ["Schaurig gute Pflegefachkraft", "Schaurig gute Pflegefachkräfte"],
+        text:  ["Schaurig gute Pflegefachkraft", "Schaurig gute Pflegefachkräfte"] },
+      { label: ["Pflegefachassistenz mit Biss", "Pflegefachassistenzen mit Biss"],
+        text:  ["Pflegefachassistenz mit Biss", "Pflegefachassistenzen mit Biss"] },
+      { label: ["Süßes oder Pflege?", "Süßes oder Pflege?"],
+        text:  ["Süßes oder Pflege? Pflege!", "Süßes oder Pflege? Pflege!"] },
+      { label: ["Pflege-Held:in der Nacht", "Pflege-Held:innen der Nacht"],
+        text:  ["Pflege-Held:in der Nacht", "Pflege-Held:innen der Nacht"] },
+      { label: ["Kein Spuk: mein Weg in die Pflege", "Kein Spuk: unser Weg in die Pflege"],
+        text:  ["Kein Spuk: Mein Weg in die Pflege beginnt hier", "Kein Spuk: Unser Weg in die Pflege beginnt hier"] }
+    ],
+    bubbles: [
+      ["Buh! Ich werde Pflegeprofi!", "Buh! Wir werden Pflegeprofis!"],
+      ["Pflege ist kein Hexenwerk!", "Pflege ist kein Hexenwerk!"],
+      ["Team Aschke 🎃", "Team Aschke 🎃"],
+      ["Nachtschicht? Ich bin bereit!", "Nachtschicht? Wir sind bereit!"],
+      ["Zum Fürchten gut!", "Zum Fürchten gut!"]
+    ]
+  },
   countdown: 3,          // Sekunden bis zum Foto
   idleSeconds: 75,       // danach Reset auf Startzustand (das Foto wird gelöscht)
   galleryUrl: "https://aschke-seminare.de/unsere-veranstaltungen-2/",   // Ziel des QR-Codes (der QR-Code ist fest im HTML eingebettet, bei Änderung neu erzeugen)
@@ -254,6 +278,15 @@ const FONT = 'system-ui, "Helvetica Neue", Arial, sans-serif';
 /* ===================== Zustand ===================== */
 const state = { plural: false, slogan: 0, bubble: 0, hearts: true, ekg: false, glasses: false, count: 0 };
 const pick = pair => pair[state.plural ? 1 : 0];   // Einzahl oder Mehrzahl
+// Halloween-Modus: wird im Mitarbeiter-Bereich umgeschaltet und auf diesem Gerät gemerkt (auch per Adresse ?halloween=1 / ?halloween=0)
+const HALLO_KEY = "aschke-booth-halloween";
+state.halloween = false;
+try {
+  const q = new URLSearchParams(location.search).get("halloween");
+  if (q === "1" || q === "0") localStorage.setItem(HALLO_KEY, q);
+  state.halloween = localStorage.getItem(HALLO_KEY) === "1";
+} catch (e) { /* ohne Speicher bleibt der Modus aus */ }
+const T = () => state.halloween ? CONFIG.halloween : CONFIG;   // aktive Spruch- und Sprechblasen-Texte
 const el = id => document.getElementById(id);
 const live = el("live"), lctx = live.getContext("2d");
 const video = el("video"), stage = el("stage"), resultImg = el("result");
@@ -325,6 +358,118 @@ function drawHearts(ctx) {
     ctx.restore();
   }
 }
+/* ===================== Halloween-Deko ===================== */
+function drawBat(ctx, x, y, s, r) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(r); ctx.scale(s, s);
+  const half = sg => {
+    ctx.moveTo(0, -0.3); ctx.lineTo(sg * 0.12, -0.52); ctx.lineTo(sg * 0.2, -0.27);
+    ctx.quadraticCurveTo(sg * 0.6, -0.62, sg * 1.0, -0.32);
+    ctx.quadraticCurveTo(sg * 0.88, -0.06, sg * 0.72, 0.1);
+    ctx.quadraticCurveTo(sg * 0.6, -0.06, sg * 0.46, 0.16);
+    ctx.quadraticCurveTo(sg * 0.34, 0.0, sg * 0.2, 0.3);
+    ctx.lineTo(0, 0.5);
+  };
+  ctx.beginPath(); half(1); half(-1); ctx.closePath();
+  ctx.lineJoin = "round"; ctx.lineWidth = 0.1; ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.fillStyle = "#2b1b3a"; ctx.fill();
+  ctx.fillStyle = "#ffd23f";
+  for (const sg of [-1, 1]) { ctx.beginPath(); ctx.arc(sg * 0.075, -0.2, 0.035, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+function drawWeb(ctx) {
+  const ox = 36, oy = 36, R = 330, spokes = 6;
+  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  const web = () => {
+    ctx.beginPath();
+    for (let i = 0; i < spokes; i++) { const a = (i / (spokes - 1)) * Math.PI / 2; ctx.moveTo(ox, oy); ctx.lineTo(ox + Math.cos(a) * R, oy + Math.sin(a) * R); }
+    for (const rr_ of [95, 170, 250, R]) {
+      for (let i = 0; i < spokes - 1; i++) {
+        const a1 = (i / (spokes - 1)) * Math.PI / 2, a2 = ((i + 1) / (spokes - 1)) * Math.PI / 2, am = (a1 + a2) / 2;
+        const x1 = ox + Math.cos(a1) * rr_, y1 = oy + Math.sin(a1) * rr_, x2 = ox + Math.cos(a2) * rr_, y2 = oy + Math.sin(a2) * rr_;
+        const cx = ox + Math.cos(am) * rr_ * 0.9, cy = oy + Math.sin(am) * rr_ * 0.9;
+        ctx.moveTo(x1, y1); ctx.quadraticCurveTo(cx, cy, x2, y2);
+      }
+    }
+  };
+  web(); ctx.strokeStyle = "rgba(43,27,58,.55)"; ctx.lineWidth = 9; ctx.stroke();
+  web(); ctx.strokeStyle = "rgba(255,255,255,.95)"; ctx.lineWidth = 4.5; ctx.stroke();
+  ctx.restore();
+}
+function drawSpider(ctx, x, y, len) {
+  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.beginPath(); ctx.moveTo(x, 36); ctx.lineTo(x, y);
+  ctx.strokeStyle = "rgba(43,27,58,.55)"; ctx.lineWidth = 8; ctx.stroke();
+  ctx.strokeStyle = "rgba(255,255,255,.95)"; ctx.lineWidth = 4; ctx.stroke();
+  ctx.translate(x, y + 26);
+  const legs = () => {
+    ctx.beginPath();
+    for (const sg of [-1, 1]) for (let i = 0; i < 4; i++) {
+      const dy = -14 + i * 12;
+      ctx.moveTo(0, dy * 0.5); ctx.quadraticCurveTo(sg * 38, dy - 22, sg * (46 + i * 3), dy + 14 + i * 6);
+    }
+  };
+  legs(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 13; ctx.stroke();
+  legs(); ctx.strokeStyle = "#2b1b3a"; ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, 8, 26, 31, 0, 0, Math.PI * 2); ctx.arc(0, -22, 17, 0, Math.PI * 2);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 8; ctx.stroke(); ctx.fillStyle = "#2b1b3a"; ctx.fill();
+  ctx.fillStyle = "#ffd23f";
+  for (const sg of [-1, 1]) { ctx.beginPath(); ctx.arc(sg * 7, -26, 4.5, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+function drawPumpkin(ctx, x, y, r, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot || 0);
+  const body = () => { ctx.beginPath(); for (const dx of [-0.52, 0.52, -0.26, 0.26, 0]) ctx.ellipse(dx * r, 0, r * 0.52, r * 0.82, 0, 0, Math.PI * 2); };
+  ctx.lineJoin = "round";
+  body(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 14; ctx.stroke();
+  const g = ctx.createLinearGradient(0, -r, 0, r); g.addColorStop(0, "#ffa43a"); g.addColorStop(1, "#f06a00");
+  body(); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = "#b8500a"; ctx.lineWidth = 4; ctx.stroke();
+  ctx.strokeStyle = "rgba(184,80,10,.55)"; ctx.lineWidth = 4;
+  for (const dx of [-0.3, 0, 0.3]) { ctx.beginPath(); ctx.ellipse(dx * r * 1.1, 0, r * 0.2, r * 0.8, 0, 0, Math.PI * 2); ctx.stroke(); }
+  // Stiel
+  ctx.beginPath(); ctx.moveTo(-r * 0.12, -r * 0.78); ctx.quadraticCurveTo(-r * 0.05, -r * 1.12, r * 0.18, -r * 1.12); ctx.lineTo(r * 0.2, -r * 0.95); ctx.quadraticCurveTo(r * 0.1, -r * 0.92, r * 0.14, -r * 0.76); ctx.closePath();
+  ctx.fillStyle = "#4c8a2b"; ctx.fill(); ctx.strokeStyle = "#2f5a18"; ctx.lineWidth = 3; ctx.stroke();
+  // Gesicht mit leuchtendem Innenraum
+  ctx.fillStyle = "#ffe066"; ctx.strokeStyle = "#7a3300"; ctx.lineWidth = 3;
+  for (const sg of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sg * r * 0.2, -r * 0.05); ctx.lineTo(sg * r * 0.5, -r * 0.05); ctx.lineTo(sg * r * 0.35, -r * 0.34); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-r * 0.55, r * 0.22);
+  const zs = [[-0.4, 0.4], [-0.25, 0.26], [-0.1, 0.44], [0.05, 0.28], [0.2, 0.44], [0.35, 0.26], [0.55, 0.22]];
+  zs.forEach(([a, b]) => ctx.lineTo(a * r, b * r)); ctx.lineTo(0.4 * r, 0.6 * r); ctx.lineTo(-0.4 * r, 0.6 * r); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function drawGhost(ctx, x, y, w, rot) {
+  const h = w * 1.25;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot || 0);
+  const shape = () => {
+    ctx.beginPath(); ctx.moveTo(-w / 2, 0); ctx.arc(0, 0, w / 2, Math.PI, 0);
+    ctx.lineTo(w / 2, h);
+    const n = 4, sw = w / n;
+    for (let i = 0; i < n; i++) ctx.quadraticCurveTo(w / 2 - sw * i - sw / 2, h - w * 0.2 * (i % 2 ? -1 : 1) + w * 0.1, w / 2 - sw * (i + 1), h);
+    ctx.closePath();
+  };
+  ctx.lineJoin = "round";
+  shape(); ctx.strokeStyle = "rgba(43,27,58,.85)"; ctx.lineWidth = 9; ctx.stroke();
+  ctx.shadowColor = "rgba(0,0,0,.25)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+  shape(); ctx.fillStyle = "#fff"; ctx.fill(); ctx.shadowColor = "transparent";
+  ctx.fillStyle = "#2b1b3a";
+  for (const sg of [-1, 1]) { ctx.beginPath(); ctx.ellipse(sg * w * 0.18, -w * 0.02, w * 0.07, w * 0.11, 0, 0, Math.PI * 2); ctx.fill(); }
+  ctx.beginPath(); ctx.ellipse(0, w * 0.27, w * 0.09, w * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(243,156,165,.7)";
+  for (const sg of [-1, 1]) { ctx.beginPath(); ctx.ellipse(sg * w * 0.3, w * 0.15, w * 0.06, w * 0.04, 0, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+function drawHalloween(ctx) {
+  drawWeb(ctx);
+  drawSpider(ctx, 205, 215);
+  drawBat(ctx, 395, 125, 78, -0.2);
+  drawBat(ctx, 330, 255, 54, 0.3);
+  drawBat(ctx, 910, 360, 92, 0.22);
+  drawBat(ctx, 95, 560, 64, -0.3);
+  drawGhost(ctx, 925, 800, 130, 0.12);
+  drawPumpkin(ctx, 150, 975, 92, -0.08);
+  drawPumpkin(ctx, 290, 1030, 56, 0.1);
+}
+
 function drawEkg(ctx) {
   const y = 1040, pts = [
     [60, 0], [420, 0], [455, -18], [485, 18], [515, 0],
@@ -413,7 +558,7 @@ function drawGlasses(ctx, src, faces, px, py, pw, ph) {
 }
 
 function drawBubble(ctx) {
-  const text = pick(CONFIG.bubbles[state.bubble]);
+  const text = pick(T().bubbles[state.bubble]);
   ctx.save();
   ctx.font = `800 44px ${FONT}`;
   const lines = wrap(ctx, text, 430), lh = 54;
@@ -454,7 +599,7 @@ function drawScene(ctx, src, scale, count, faces) {
     ctx.fillText("Kamera startet …", 540, 560);
   }
   if (state.glasses && src) drawGlasses(ctx, src, faces || liveFaces, px, py, pw, ph);
-  if (state.hearts) drawHearts(ctx);
+  if (state.hearts) { if (state.halloween) drawHalloween(ctx); else drawHearts(ctx); }
   if (state.ekg) drawEkg(ctx);
   if (state.bubble >= 0) drawBubble(ctx);
   if (count > 0) {
@@ -472,7 +617,7 @@ function drawScene(ctx, src, scale, count, faces) {
     const lw = 366, lh = lw * logo.naturalHeight / logo.naturalWidth;
     ctx.drawImage(logo, 60 + (410 - lw) / 2, by + 22 + (190 - lh) / 2, lw, lh);
   }
-  const slogan = pick(CONFIG.slogans[state.slogan].text);
+  const slogan = pick(T().slogans[state.slogan].text);
   let fs = 48, lines;
   do { ctx.font = `800 ${fs}px ${FONT}`; lines = wrap(ctx, slogan, 510); fs -= 2; } while (lines.length > 2 && fs > 30);
   fs += 2;
@@ -604,16 +749,17 @@ el("shutter").addEventListener("click", capture);
 /* ===================== Bedienelemente ===================== */
 function syncUi() {
   [...el("sloganChips").children].forEach((b, i) => {
-    b.textContent = pick(CONFIG.slogans[i].label);
+    b.textContent = pick(T().slogans[i].label);
     b.setAttribute("aria-checked", String(i === state.slogan));
   });
   el("pSingle").setAttribute("aria-checked", String(!state.plural));
   el("pGroup").setAttribute("aria-checked", String(state.plural));
   el("tHearts").setAttribute("aria-pressed", String(state.hearts));
+  el("tHearts").textContent = state.halloween ? "Halloween-Deko" : "Herzchen";
   el("tEkg").setAttribute("aria-pressed", String(state.ekg));
   el("tGlasses").setAttribute("aria-pressed", String(state.glasses));
   el("tBubble").setAttribute("aria-pressed", String(state.bubble >= 0));
-  el("tBubble").textContent = state.bubble >= 0 ? `Sprechblase ${state.bubble + 1}/${CONFIG.bubbles.length}` : "Sprechblase";
+  el("tBubble").textContent = state.bubble >= 0 ? `Sprechblase ${state.bubble + 1}/${T().bubbles.length}` : "Sprechblase";
   el("tagHint").textContent = CONFIG.hashtag;
 }
 CONFIG.slogans.forEach((s, i) => {
@@ -637,7 +783,7 @@ el("tGlasses").addEventListener("click", async () => {
 });
 el("tBubble").addEventListener("click", () => {
   // aus → Text 1 → Text 2 → Text 3 → aus
-  state.bubble = state.bubble + 1 >= CONFIG.bubbles.length ? -1 : state.bubble + 1;
+  state.bubble = state.bubble + 1 >= T().bubbles.length ? -1 : state.bubble + 1;
   syncUi();
 });
 
@@ -730,6 +876,17 @@ function closeStaff() {
   galleryUrls.forEach(u => URL.revokeObjectURL(u)); galleryUrls = [];
 }
 el("staffClose").addEventListener("click", closeStaff);
+function syncHallo() {
+  el("halloBtn").textContent = state.halloween ? "Halloween: an" : "Halloween: aus";
+  el("halloBtn").classList.toggle("halloon", state.halloween);
+  el("halloBtn").setAttribute("aria-pressed", String(state.halloween));
+}
+el("halloBtn").addEventListener("click", () => {
+  state.halloween = !state.halloween;
+  try { localStorage.setItem(HALLO_KEY, state.halloween ? "1" : "0"); } catch (e) { /* gilt dann nur bis zum Neustart */ }
+  syncHallo(); syncUi();
+});
+syncHallo();
 
 async function renderGrid() {
   galleryUrls.forEach(u => URL.revokeObjectURL(u)); galleryUrls = [];

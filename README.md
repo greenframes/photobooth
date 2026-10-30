@@ -26,6 +26,12 @@ Alle Dateien müssen im selben Ordner liegen, Pfade sind relativ. Die App läuft
 4. Jedes Foto wird automatisch auf dem iPad in der App gespeichert (siehe „Lokale Ablage“). Besucher können ihr Foto über „Mein Foto vom iPad löschen“ sofort wieder entfernen.
 5. Nach 75 Sekunden ohne Bedienung springt die App auf die Live-Ansicht zurück, alle Einstellungen gehen auf „Ich allein“ und den Startzustand. Gespeicherte Fotos bleiben erhalten. Das gilt auch auf der Live-Ansicht, wenn jemand etwas verstellt und dann weggegangen ist.
 
+## Halloween-Modus
+
+Im Mitarbeiter-Bereich (5× aufs Logo tippen, PIN) gibt es oben den Schalter **„Halloween: aus / an“**. Im Halloween-Modus erscheinen andere Sprüche („Schaurig gute Pflegefachkraft“, „Pflegefachassistenz mit Biss“ …), andere Sprechblasen („Buh! Ich werde Pflegeprofi!“, „Pflege ist kein Hexenwerk!“ …) und statt der Herzchen Halloween-Deko (Spinnennetz, Spinne, Fledermäuse, Geist, Kürbisse). Rahmen, Logo, Farbe und Hashtag bleiben gleich, der Schalter Einzahl/Mehrzahl funktioniert weiter.
+
+Die Einstellung gilt für das jeweilige iPad und bleibt nach einem Neustart erhalten. Alternativ schaltet die Adresse `…/photobooth/?halloween=1` den Modus ein, `?halloween=0` aus. Die Texte stehen im Block `CONFIG.halloween` in `index.html`.
+
 ## Sonnenbrille
 
 Der Sticker „Sonnenbrille“ setzt die pinke Merch-Brille auf jedes erkannte Gesicht (Position, Größe und Neigung folgen den Augen, schon in der Live-Vorschau). Die Erkennung läuft im Browser auf dem iPad, es wird nichts übertragen, und sie funktioniert auch offline. Die Brille ist das Foto der echten Merch-Brille, freigestellt (`icons/glasses.png`, Funktion `drawGlasses` in `index.html`) und passend zu den Augen skaliert, gedreht und gesetzt. Für eine andere Brille das Bild austauschen und die Glasmitten in `GLASSES` anpassen. Beim ersten Einschalten wird die Erkennung geladen, das dauert einen kurzen Moment („Sonnenbrille lädt …“). Beim Foto wird die Erkennung noch einmal auf dem Bild selbst ausgeführt. Bei starker Kopfdrehung wirkt die flache Brille unnatürlich, Haare oder Hände vor dem Gesicht liegen unter der Brille.
@@ -84,6 +90,7 @@ Für die Installation auf dem iPad die Adresse **direkt in Safari** öffnen. Wer
 - [ ] Galerie: 5× auf Logo tippen, PIN, Fotos erscheinen, Ansehen/Teilen/Löschen funktioniert
 - [ ] ZIP: „Alle als ZIP“ erzeugt Datei, Teilen an AirDrop/Mac, ZIP lässt sich öffnen
 - [ ] QR-Code auf dem Ergebnis-Bildschirm lässt sich mit einem Handy scannen (Abstand ca. 50 cm) und öffnet die Veranstaltungsseite
+- [ ] Halloween-Modus im Mitarbeiter-Bereich ein- und ausschalten: Sprüche, Sprechblasen und Deko wechseln, Modus bleibt nach App-Neustart
 - [ ] Sonnenbrille: sitzt in der Live-Vorschau auf den Augen, folgt dem Kopf flüssig (sonst Erkennung seltener laufen lassen), auch bei zwei bis drei Personen, und ist auf dem fertigen Foto an derselben Stelle
 - [ ] Sonnenbrille im Flugmodus nach vorherigem Laden mit Netz
 - [ ] Fotos sind nach App-Neustart und im Flugmodus noch da
