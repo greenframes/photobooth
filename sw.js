@@ -1,7 +1,7 @@
 /* Service Worker der Aschke Foto-Booth
    Beim ersten Laden wird alles Nötige gespeichert, danach läuft die App auch ohne Netz.
    Bei jeder Änderung an den Dateien die Versionsnummer in CACHE erhöhen. */
-const CACHE = "aschke-booth-v11";
+const CACHE = "aschke-booth-v12";
 const SHELL = [
   "./",
   "index.html",
